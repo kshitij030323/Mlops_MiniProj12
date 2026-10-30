@@ -41,6 +41,8 @@ class Settings:
     llm_base_url: str = field(default_factory=lambda: _req("LLM_BASE_URL"))
     llm_api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", ""))
     llm_model: str = field(default_factory=lambda: _req("LLM_MODEL"))
+    # Optional provider hint (e.g. "none" for Gemini thinking models); omitted from the request when empty
+    llm_reasoning_effort: str = field(default_factory=lambda: os.getenv("LLM_REASONING_EFFORT", ""))
     llm_timeout_s: float = field(default_factory=lambda: _f("LLM_TIMEOUT_S", 20))
     llm_max_retries: int = field(default_factory=lambda: _i("LLM_MAX_RETRIES", 2))
     llm_backoff_base_s: float = field(default_factory=lambda: _f("LLM_BACKOFF_BASE_S", 0.5))

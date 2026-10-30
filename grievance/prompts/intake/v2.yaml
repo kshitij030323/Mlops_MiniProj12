@@ -17,5 +17,6 @@ user: |
   Return JSON with keys:
   product, entity_name, entity_type (broker|mutual_fund|registrar|listed_company|depository|bank|nbfc|payment_system|insurance|pension|chit_fund|crypto|unknown),
   domain (broker|mutual_fund|registrar|listed_company|depository|out_of_jurisdiction|unknown),
-  candidate_regulators (list of SEBI|RBI|IRDAI|PFRDA), split (bool), out_of_corpus (bool), summary (one sentence).
+  candidate_regulators (list of SEBI|RBI|IRDAI|PFRDA), split (bool),
+  out_of_corpus (bool: true only if the regulator is neither SEBI nor RBI; both are in the corpus), summary (one sentence).
   <<DATA>>{data}<<END>>

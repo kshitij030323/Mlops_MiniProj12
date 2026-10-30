@@ -109,9 +109,12 @@ async def chat(messages: list[dict], *, agent: str, step: str, correlation_id: s
     if s.llm_api_key:
         headers["Authorization"] = f"Bearer {s.llm_api_key}"
     body = {"model": s.llm_model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens}
+    if s.llm_reasoning_effort:
+        body["reasoning_effort"] = s.llm_reasoning_effort
     url = f"{s.llm_base_url.rstrip('/')}/chat/completions"
 
     last_err: Exception | None = None
+    retry_after: float | None = None
     t0 = time.perf_counter()
     with tracer().start_as_current_span(f"llm.{step}") as span:
         span.set_attribute("llm.agent", agent)
@@ -119,12 +122,24 @@ async def chat(messages: list[dict], *, agent: str, step: str, correlation_id: s
             if attempt:
                 LLM_RETRIES.labels(agent, step).inc()
                 delay = s.llm_backoff_base_s * (2 ** (attempt - 1)) * (1 + random.random() * 0.25)
+                if retry_after is not None:  # provider quota: wait for the window it names (capped)
+                    delay = max(delay, min(retry_after, 30.0))
                 await asyncio.sleep(delay)
                 if not br.allow():
                     break
             try:
                 r = await _http().post(url, json=body, headers=headers, timeout=s.llm_timeout_s)
-                if r.status_code == 429 or r.status_code >= 500:
+                if r.status_code == 429 and "per day" in (r.text or "").lower():
+                    # A daily quota will not recover within this run: treat as unavailable so the breaker opens.
+                    raise httpx.HTTPStatusError("provider daily quota exhausted (429)", request=r.request, response=r)
+                if r.status_code == 429:
+                    # Rate limiting is back-pressure, not an outage: back off, but do not count it toward the breaker.
+                    retry_after = _retry_after(r)
+                    last_err = httpx.HTTPStatusError("provider status 429", request=r.request, response=r)
+                    log.warning("llm_rate_limited", agent=agent, step=step, attempt=attempt, retry_after_s=retry_after)
+                    continue
+                retry_after = None
+                if r.status_code >= 500:
                     raise httpx.HTTPStatusError(f"provider status {r.status_code}", request=r.request, response=r)
                 r.raise_for_status()
                 data = r.json()
@@ -152,6 +167,16 @@ async def chat(messages: list[dict], *, agent: str, step: str, correlation_id: s
         LLM_CALLS.labels(agent, step, "failed").inc()
         span.set_attribute("llm.failed", True)
     raise LLMUnavailable(f"LLM call failed after retries: {last_err}")
+
+
+def _retry_after(r: httpx.Response) -> float:
+    """Seconds to wait from a 429: Retry-After header, else a Google-style retryDelay in the body, else 10 s."""
+    try:
+        return float(r.headers["retry-after"])
+    except (KeyError, ValueError):
+        pass
+    m = re.search(r'"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"', r.text or "")
+    return float(m.group(1)) if m else 10.0
 
 
 _JSON_RE = re.compile(r"\{.*\}", re.S)

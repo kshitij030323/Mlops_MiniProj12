@@ -97,7 +97,9 @@ def verify(determination: dict, evidence: list[dict], facts: list[str] | None = 
     claim_scores = [support(cl, cited_text) for cl in claims]
     groundedness = sum(claim_scores) / len(claim_scores) if claim_scores else 1.0
     if route != "escalate_to_human" and groundedness < GROUNDEDNESS_THRESHOLD:
-        failures.append({"code": "basis_not_grounded", "detail": round(groundedness, 2)})
+        # Name the weakly supported sentences so a redraft can fix them (otherwise the model repeats itself).
+        weak = [cl for cl, sc in zip(claims, claim_scores) if sc < GROUNDEDNESS_THRESHOLD]
+        failures.append({"code": "basis_not_grounded", "detail": round(groundedness, 2), "weak_claims": weak[:3]})
 
     n = len(determination.get("citations") or [])
     return {

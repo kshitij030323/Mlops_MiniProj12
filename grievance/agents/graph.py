@@ -203,6 +203,9 @@ async def intake_agent(state: RunState, ctx: RunContext, step: dict) -> dict:
             intake, source = {**prior, "model_disagreed": out.get("domain")}, "rules_override"
         intake["candidate_regulators"] = [r for r in dict.fromkeys(
             (intake.get("candidate_regulators") or []) + prior["candidate_regulators"])]
+        # Corpus coverage is a fact about our index, not a model judgement: derive it rather than trust the flag.
+        intake["out_of_corpus"] = (intake.get("entity_type") in rules.OUT_OF_CORPUS
+                                   or any(r not in ("SEBI", "RBI") for r in intake["candidate_regulators"]))
     intake["source"] = source
     step.update(intake={k: intake.get(k) for k in ("product", "entity_type", "domain", "candidate_regulators",
                                                    "split", "out_of_corpus", "source")})

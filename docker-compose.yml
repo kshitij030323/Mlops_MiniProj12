@@ -9,6 +9,9 @@ x-py: &py
   volumes:
     - data:/data
   restart: unless-stopped
+  # External lookups (hosted model provider) fall back to public resolvers if the VM's forwarder flakes;
+  # service names still resolve through Docker's embedded DNS.
+  dns: [8.8.8.8, 1.1.1.1]
 
 services:
   redis:
