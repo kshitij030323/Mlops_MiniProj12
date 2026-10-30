@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grievance Routing</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 16px; }
+  label { display: block; margin-top: 8px; font-weight: 600; }
+  input, select, textarea { width: 100%; padding: 6px; box-sizing: border-box; }
+  textarea { height: 110px; }
+  .row { display: flex; gap: 12px; } .row > div { flex: 1; }
+  button { margin-top: 12px; padding: 8px 16px; }
+  pre { background: #f4f4f4; padding: 8px; white-space: pre-wrap; }
+  .cite { border-left: 4px solid #3a6; padding: 4px 10px; margin: 6px 0; background: #f6fbf7; }
+  .esc { border-left: 4px solid #c60; padding: 4px 10px; background: #fff6ee; }
+</style>
+</head>
+<body>
+<h2>Securities Investor Grievance Routing (synthetic complaints only)</h2>
+<p>This page returns a routing <b>recommendation</b> with citations. It does not dispose of a complaint; a grievance officer decides.</p>
+<button type="button" onclick="loadExample()">Load section 4.1 example</button>
+<form id="f">
+  <label>Complaint text</label><textarea name="complaint_text" required></textarea>
+  <div class="row">
+    <div><label>Entity name</label><input name="entity_name"></div>
+    <div><label>Entity type (claimed)</label>
+      <select name="entity_type_claimed">
+        <option>unknown</option><option>broker</option><option>mutual_fund</option><option>registrar</option>
+        <option>listed_company</option><option>depository</option><option>depository_participant</option>
+        <option>bank</option><option>nbfc</option><option>insurance</option><option>other</option>
+      </select></div>
+  </div>
+  <div class="row">
+    <div><label>Incident date</label><input type="date" name="incident_date" required></div>
+    <div><label>Amount (INR)</label><input type="number" name="amount_inr" min="0"></div>
+    <div><label>Regulator addressed</label>
+      <select name="regulator_addressed"><option>SEBI</option><option>RBI</option><option>unknown</option></select></div>
+  </div>
+  <div class="row">
+    <div><label>Complainant name</label><input name="name" value="Test Investor" required></div>
+    <div><label>Email</label><input name="email" value="investor@example.com" required></div>
+    <div><label>State</label><input name="state" value="Karnataka" required></div>
+  </div>
+  <button type="submit">Submit</button>
+</form>
+<h3>Result</h3>
+<div id="status">-</div>
+<div id="out"></div>
+<script>
+const f = document.getElementById('f');
+function loadExample() {
+  f.complaint_text.value = "I invested in a fixed deposit through my bank's app. The interest credited is lower than what I was promised. I want to complain to SEBI.";
+  f.entity_name.value = "Example Bank Ltd"; f.incident_date.value = new Date(Date.now() - 20*864e5).toISOString().slice(0,10);
+  f.amount_inr.value = 200000;
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+f.onsubmit = async (e) => {
+  e.preventDefault();
+  const body = {
+    complainant: {name: f.name.value, email: f.email.value, state: f.state.value},
+    channel: "web", complaint_text: f.complaint_text.value, entity_name: f.entity_name.value || null,
+    entity_type_claimed: f.entity_type_claimed.value, incident_date: f.incident_date.value,
+    amount_inr: f.amount_inr.value ? Number(f.amount_inr.value) : null, regulator_addressed: f.regulator_addressed.value
+  };
+  document.getElementById('out').innerHTML = '';
+  const r = await fetch('/v1/complaints', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Client-Id': 'web-client'}, body: JSON.stringify(body)});
+  const j = await r.json();
+  if (r.status !== 202) { document.getElementById('status').innerHTML = '<pre>' + esc(JSON.stringify(j, null, 2)) + '</pre>'; return; }
+  poll(j.run_id);
+};
+async function poll(id) {
+  const st = document.getElementById('status');
+  for (let i = 0; i < 240; i++) {
+    const r = await (await fetch('/v1/runs/' + id)).json();
+    st.textContent = 'run ' + id + ': ' + r.status;
+    if (['completed', 'escalated', 'degraded', 'failed'].includes(r.status)) { render(r); return; }
+    await new Promise(res => setTimeout(res, 1000));
+  }
+}
+function render(r) {
+  const d = r.determination || {};
+  let h = `<p><b>Route:</b> ${esc(d.route)} &nbsp; <b>Regulator:</b> ${esc(d.regulator)} &nbsp; <b>Domain:</b> ${esc(d.domain)}</p>`;
+  if (d.provisional_route) h += `<p><b>Provisional route (not issued):</b> ${esc(d.provisional_route)}</p>`;
+  h += `<p><b>Responsible entity:</b> ${esc(d.responsible_entity)}</p><p><b>Timeline:</b> ${esc(d.timeline)}</p>`;
+  h += `<p><b>Basis:</b> ${esc(d.basis)}</p>`;
+  if (d.reason) h += `<p><b>Reason:</b> ${esc(d.reason)}</p>`;
+  for (const c of d.citations || []) h += `<div class="cite"><b>${esc(c.clause_id)}</b> (${esc(c.regulator)} - ${esc(c.reference)})<br>"${esc(c.quote)}"</div>`;
+  const e = r.escalation || {};
+  if (e.required) h += `<div class="esc"><b>Escalated to a human:</b> ${esc(e.reason)}<br><b>Path:</b> ${esc(e.path)}</div>`;
+  h += `<p><b>Verification:</b> ${esc(JSON.stringify(r.verification))}</p>`;
+  h += `<p><b>Prompt versions:</b> ${esc(JSON.stringify(r.prompt_versions))} <b>Usage:</b> ${esc(JSON.stringify(r.usage))}</p>`;
+  h += `<p><a href="/v1/runs/${r.run_id}/trace" target="_blank">Full trace</a> |
+        <button type="button" onclick="fb('${r.run_id}', true)">Satisfactory</button>
+        <button type="button" onclick="fb('${r.run_id}', false)">Not satisfactory</button></p>`;
+  document.getElementById('out').innerHTML = h;
+}
+async function fb(id, ok) {
+  const reason = prompt('Reason?') || (ok ? 'correct routing' : 'incorrect routing');
+  await fetch('/v1/runs/' + id + '/feedback', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({satisfactory: ok, reason})});
+  alert('Feedback stored');
+}
+</script>
+</body>
+</html>

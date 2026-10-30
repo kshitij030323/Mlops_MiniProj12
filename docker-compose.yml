@@ -1,0 +1,142 @@
+# docker compose up --build            (after: cp .env.example .env)
+# docker compose up --build --scale agent-worker=3
+# docker compose --profile loadtest up locust
+# All Python services share one image. Only `indexer` builds it; the others reuse the tag (no parallel duplicate builds).
+x-py: &py
+  image: grievance-routing:local
+  pull_policy: never
+  env_file: .env
+  volumes:
+    - data:/data
+  restart: unless-stopped
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  indexer:
+    <<: *py
+    pull_policy: missing   # build the shared image only if it does not exist yet
+    build:
+      context: .
+      additional_contexts:
+        wheels: ${WHEELHOUSE_DIR:-./ops/build/empty}
+        hfseed: ${HF_SEED_DIR:-./ops/build/empty}
+      args:
+        EMBEDDING_MODEL: ${EMBEDDING_MODEL:?set EMBEDDING_MODEL in .env (cp .env.example .env)}
+    restart: "no"
+    environment: {SERVICE_NAME: indexer}
+    command: ["python", "-m", "grievance.ingest", "build"]
+
+  llm-stub:
+    <<: *py
+    environment: {SERVICE_NAME: llm-stub}
+    command: ["uvicorn", "grievance.services.llm_stub:app", "--host", "0.0.0.0", "--port", "8090"]
+    ports: ["8090:8090"]
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8090/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  verifier:
+    <<: *py
+    environment: {SERVICE_NAME: verifier}
+    command: ["uvicorn", "grievance.services.verifier:app", "--host", "0.0.0.0", "--port", "8082"]
+    depends_on:
+      llm-stub: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8082/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  agent-worker:
+    <<: *py
+    environment: {SERVICE_NAME: agent-worker, METRICS_PORT: "9100"}
+    command: ["python", "-m", "grievance.services.worker"]
+    depends_on:
+      redis: {condition: service_healthy}
+      verifier: {condition: service_healthy}
+      indexer: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:9100/metrics"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 60s
+
+  api:
+    <<: *py
+    environment: {SERVICE_NAME: api}
+    command: ["uvicorn", "grievance.services.api:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports: ["8000:8000"]
+    depends_on:
+      redis: {condition: service_healthy}
+      indexer: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    volumes: ["./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["9090:9090"]
+    depends_on: [api]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    env_file: .env
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["3000:3000"]
+    depends_on:
+      prometheus: {condition: service_healthy}
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    environment: {COLLECTOR_OTLP_ENABLED: "true"}
+    ports: ["16686:16686"]
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+
+  locust:
+    image: locustio/locust:2.32.4
+    profiles: ["loadtest"]
+    volumes: ["./loadtest:/mnt/loadtest", "./eval:/mnt/eval:ro"]
+    working_dir: /mnt
+    command: ["-f", "/mnt/loadtest/locustfile.py", "--host", "http://api:8000", "--headless", "-u", "16", "-r", "4",
+              "-t", "90s", "--csv", "/mnt/loadtest/results/compose", "--only-summary"]
+    depends_on:
+      api: {condition: service_healthy}
+
+volumes:
+  data:
+  redisdata:

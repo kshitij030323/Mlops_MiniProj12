@@ -1,0 +1,25 @@
+@doc_id: SEBI-MF-REGS
+@regulator: SEBI
+@title: SEBI (Mutual Funds) Regulations, 1996 - provisions on investor servicing (read with SEBI Master Circular for Mutual Funds)
+@reference: SEBI (Mutual Funds) Regulations, 1996
+@version: 2024-consolidated
+@source_url: https://www.sebi.gov.in/legal/regulations/
+@note: Curated clause-level extract prepared for indexing. Wording is condensed; confirm against the official consolidated regulations at Evaluation 1.
+
+## [MFR-25] Obligations of the asset management company | type=responsibility | entities=mutual_fund
+The asset management company shall be responsible for the acts of commission or omission by its employees and by the persons whose services have been procured by it, including the registrar and transfer agent. The asset management company shall take adequate steps for redressal of investor grievances relating to the schemes of the mutual fund.
+
+## [MFR-53A] Transfer of redemption proceeds | type=timeline | entities=mutual_fund
+The asset management company shall transfer the redemption or repurchase proceeds to the unitholders within three working days from the date of redemption or repurchase.
+
+## [MFR-53B] Transfer of IDCW | type=timeline | entities=mutual_fund
+The asset management company shall transfer the amount of Income Distribution cum Capital Withdrawal (IDCW) to the unitholders within seven working days from the record date.
+
+## [MFR-53C] Interest for delayed payment | type=obligation | entities=mutual_fund
+In the event of failure to transfer the redemption proceeds or the IDCW amount within the stipulated period, the asset management company shall be liable to pay interest to the unitholders at the rate of fifteen per cent per annum for the period of delay.
+
+## [MFR-36] Account statements | type=obligation | entities=mutual_fund
+The asset management company shall send an account statement to the investor confirming the allotment of units, and a consolidated account statement for each calendar month in which a transaction has taken place, on or before the fifteenth day of the succeeding month.
+
+## [MFR-NAV] Computation and disclosure of net asset value | type=obligation | entities=mutual_fund
+The net asset value of every scheme shall be computed and published for each business day. Subscriptions and redemptions shall be processed at the applicable net asset value as per the cut-off timings.

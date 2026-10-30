@@ -1,0 +1,33 @@
+{
+ "properties": {
+  "run_id": {
+   "title": "Run Id",
+   "type": "string"
+  },
+  "status": {
+   "title": "Status",
+   "type": "string"
+  },
+  "status_url": {
+   "title": "Status Url",
+   "type": "string"
+  },
+  "correlation_id": {
+   "title": "Correlation Id",
+   "type": "string"
+  },
+  "cached": {
+   "default": false,
+   "title": "Cached",
+   "type": "boolean"
+  }
+ },
+ "required": [
+  "run_id",
+  "status",
+  "status_url",
+  "correlation_id"
+ ],
+ "title": "RunAccepted",
+ "type": "object"
+}

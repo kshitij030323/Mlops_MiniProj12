@@ -1,0 +1,738 @@
+{
+ "uid": "grievance",
+ "title": "Grievance Routing Service",
+ "schemaVersion": 39,
+ "refresh": "10s",
+ "time": {
+  "from": "now-30m",
+  "to": "now"
+ },
+ "panels": [
+  {
+   "type": "row",
+   "title": "Service (D5, D6)",
+   "collapsed": false,
+   "panels": [],
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 1
+   },
+   "id": 1
+  },
+  {
+   "title": "Run latency end-to-end p50 / p95 (s)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "histogram_quantile(0.5, sum by (le) (rate(run_duration_seconds_bucket[2m])))",
+     "legendFormat": "p50",
+     "refId": "A"
+    },
+    {
+     "expr": "histogram_quantile(0.95, sum by (le) (rate(run_duration_seconds_bucket[2m])))",
+     "legendFormat": "p95",
+     "refId": "B"
+    },
+    {
+     "expr": "30",
+     "legendFormat": "SLO p95",
+     "refId": "C"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 1,
+    "w": 8,
+    "h": 8
+   },
+   "id": 2
+  },
+  {
+   "title": "Throughput (runs finished/s) by status",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "reqps"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (status) (rate(runs_finished_total[2m]))",
+     "legendFormat": "{{status}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 8,
+    "y": 1,
+    "w": 8,
+    "h": 8
+   },
+   "id": 3
+  },
+  {
+   "title": "Error rate (failed+degraded runs / all; HTTP 5xx / all)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum(rate(runs_finished_total{status=~\"failed|degraded\"}[2m])) / clamp_min(sum(rate(runs_finished_total[2m])), 1e-9)",
+     "legendFormat": "runs",
+     "refId": "A"
+    },
+    {
+     "expr": "sum(rate(http_requests_total{status=~\"5..\"}[2m])) / clamp_min(sum(rate(http_requests_total[2m])), 1e-9)",
+     "legendFormat": "http",
+     "refId": "B"
+    }
+   ],
+   "gridPos": {
+    "x": 16,
+    "y": 1,
+    "w": 8,
+    "h": 8
+   },
+   "id": 4
+  },
+  {
+   "title": "Availability (scrape up) by service",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "avg by (job) (up)",
+     "legendFormat": "{{job}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 9,
+    "w": 8,
+    "h": 8
+   },
+   "id": 5
+  },
+  {
+   "title": "Queue depth",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "max(run_queue_depth)",
+     "legendFormat": "queued runs",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 8,
+    "y": 9,
+    "w": 8,
+    "h": 8
+   },
+   "id": 6
+  },
+  {
+   "title": "API latency p95 by route",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket[2m])))",
+     "legendFormat": "{{route}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 16,
+    "y": 9,
+    "w": 8,
+    "h": 8
+   },
+   "id": 7
+  },
+  {
+   "type": "row",
+   "title": "Agents (A6)",
+   "collapsed": false,
+   "panels": [],
+   "gridPos": {
+    "x": 0,
+    "y": 17,
+    "w": 24,
+    "h": 1
+   },
+   "id": 8
+  },
+  {
+   "title": "Task success rate by agent",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (agent) (rate(agent_tasks_total{outcome=~\"ok|completed|escalated|blocked\"}[2m])) / clamp_min(sum by (agent) (rate(agent_tasks_total[2m])), 1e-9)",
+     "legendFormat": "{{agent}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 18,
+    "w": 8,
+    "h": 8
+   },
+   "id": 9
+  },
+  {
+   "title": "Steps and tool calls per run (mean)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "rate(agent_steps_per_run_sum[2m]) / clamp_min(rate(agent_steps_per_run_count[2m]), 1e-9)",
+     "legendFormat": "steps/run",
+     "refId": "A"
+    },
+    {
+     "expr": "rate(agent_tool_calls_per_run_sum[2m]) / clamp_min(rate(agent_tool_calls_per_run_count[2m]), 1e-9)",
+     "legendFormat": "tool calls/run",
+     "refId": "B"
+    }
+   ],
+   "gridPos": {
+    "x": 8,
+    "y": 18,
+    "w": 8,
+    "h": 8
+   },
+   "id": 10
+  },
+  {
+   "title": "Per-step latency p95 by agent/step",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "histogram_quantile(0.95, sum by (le, agent, step) (rate(agent_step_duration_seconds_bucket[2m])))",
+     "legendFormat": "{{agent}}/{{step}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 16,
+    "y": 18,
+    "w": 8,
+    "h": 8
+   },
+   "id": 11
+  },
+  {
+   "title": "LLM retry rate by agent",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (agent) (rate(llm_retries_total[2m])) / clamp_min(sum by (agent) (rate(llm_calls_total[2m])), 1e-9)",
+     "legendFormat": "{{agent}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 26,
+    "w": 8,
+    "h": 8
+   },
+   "id": 12
+  },
+  {
+   "title": "Circuit breaker open (per worker) / degraded runs",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "llm_circuit_breaker_open",
+     "legendFormat": "{{instance}}",
+     "refId": "A"
+    },
+    {
+     "expr": "sum(rate(degraded_runs_total[2m]))",
+     "legendFormat": "degraded/s",
+     "refId": "B"
+    }
+   ],
+   "gridPos": {
+    "x": 8,
+    "y": 26,
+    "w": 8,
+    "h": 8
+   },
+   "id": 13
+  },
+  {
+   "title": "Verification outcomes",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "reqps"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (outcome) (rate(verification_total[2m]))",
+     "legendFormat": "{{outcome}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 16,
+    "y": 26,
+    "w": 8,
+    "h": 8
+   },
+   "id": 14
+  },
+  {
+   "type": "row",
+   "title": "Containers",
+   "collapsed": false,
+   "panels": [],
+   "gridPos": {
+    "x": 0,
+    "y": 34,
+    "w": 24,
+    "h": 1
+   },
+   "id": 15
+  },
+  {
+   "title": "Container uptime (s)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "time() - process_start_time_seconds",
+     "legendFormat": "{{job}} {{instance}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 35,
+    "w": 8,
+    "h": 8
+   },
+   "id": 16
+  },
+  {
+   "title": "CPU by container",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name=~\".+\"}[1m]))",
+     "legendFormat": "{{name}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 8,
+    "y": 35,
+    "w": 8,
+    "h": 8
+   },
+   "id": 17
+  },
+  {
+   "title": "Memory by container",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (name) (container_memory_working_set_bytes{name=~\".+\"})",
+     "legendFormat": "{{name}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 16,
+    "y": 35,
+    "w": 8,
+    "h": 8
+   },
+   "id": 18
+  },
+  {
+   "type": "row",
+   "title": "LLMOps (L5, L6, D2, D7)",
+   "collapsed": false,
+   "panels": [],
+   "gridPos": {
+    "x": 0,
+    "y": 43,
+    "w": 24,
+    "h": 1
+   },
+   "id": 19
+  },
+  {
+   "title": "Cost per run (USD) and by step",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "currencyUSD"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum(rate(llm_cost_usd_total[2m])) / clamp_min(sum(rate(runs_finished_total[2m])), 1e-9)",
+     "legendFormat": "per run",
+     "refId": "A"
+    },
+    {
+     "expr": "sum by (step) (rate(llm_cost_usd_total[2m])) / clamp_min(sum(rate(runs_finished_total[2m])), 1e-9)",
+     "legendFormat": "{{step}}",
+     "refId": "B"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 44,
+    "w": 8,
+    "h": 8
+   },
+   "id": 20
+  },
+  {
+   "title": "Tokens/s by step and kind",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (step, kind) (rate(llm_tokens_total[2m]))",
+     "legendFormat": "{{step}} {{kind}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 8,
+    "y": 44,
+    "w": 8,
+    "h": 8
+   },
+   "id": 21
+  },
+  {
+   "title": "Live quality (sampled runs)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "live_eval_last_score",
+     "legendFormat": "{{metric}}",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 16,
+    "y": 44,
+    "w": 8,
+    "h": 8
+   },
+   "id": 22
+  },
+  {
+   "title": "Feedback satisfaction",
+   "type": "stat",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum(feedback_total{satisfactory=\"true\"}) / clamp_min(sum(feedback_total), 1)",
+     "legendFormat": "",
+     "refId": "A"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 52,
+    "w": 8,
+    "h": 8
+   },
+   "id": 23
+  },
+  {
+   "title": "Cache hit ratio (run / retrieval)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum(rate(run_cache_total{result=\"hit\"}[2m])) / clamp_min(sum(rate(run_cache_total[2m])), 1e-9)",
+     "legendFormat": "run",
+     "refId": "A"
+    },
+    {
+     "expr": "sum(rate(retrieval_cache_total{result=\"hit\"}[2m])) / clamp_min(sum(rate(retrieval_cache_total[2m])), 1e-9)",
+     "legendFormat": "retrieval",
+     "refId": "B"
+    }
+   ],
+   "gridPos": {
+    "x": 8,
+    "y": 52,
+    "w": 8,
+    "h": 8
+   },
+   "id": 24
+  },
+  {
+   "title": "Guardrail events / quarantined / rate-limited",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "sum by (kind) (increase(guardrail_events_total[10m]))",
+     "legendFormat": "{{kind}}",
+     "refId": "A"
+    },
+    {
+     "expr": "sum(increase(quarantined_requests_total[10m]))",
+     "legendFormat": "quarantined",
+     "refId": "B"
+    },
+    {
+     "expr": "sum(increase(rate_limited_total[10m]))",
+     "legendFormat": "rate limited",
+     "refId": "C"
+    }
+   ],
+   "gridPos": {
+    "x": 16,
+    "y": 52,
+    "w": 8,
+    "h": 8
+   },
+   "id": 25
+  },
+  {
+   "title": "Index freshness (age, s) / chunks / ingest throughput",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "expr": "time() - max(index_built_timestamp_seconds)",
+     "legendFormat": "age s",
+     "refId": "A"
+    },
+    {
+     "expr": "max(index_chunks)",
+     "legendFormat": "chunks",
+     "refId": "B"
+    },
+    {
+     "expr": "max(ingest_throughput_chunks_per_second)",
+     "legendFormat": "chunks/s",
+     "refId": "C"
+    }
+   ],
+   "gridPos": {
+    "x": 0,
+    "y": 60,
+    "w": 8,
+    "h": 8
+   },
+   "id": 26
+  }
+ ],
+ "tags": [
+  "grievance"
+ ]
+}

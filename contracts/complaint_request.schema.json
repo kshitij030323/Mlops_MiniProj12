@@ -1,0 +1,267 @@
+{
+ "$defs": {
+  "Channel": {
+   "enum": [
+    "web",
+    "email",
+    "app",
+    "phone"
+   ],
+   "title": "Channel",
+   "type": "string"
+  },
+  "Complainant": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "maxLength": 100,
+     "minLength": 2,
+     "title": "Name",
+     "type": "string"
+    },
+    "email": {
+     "maxLength": 200,
+     "pattern": "^[^@\\s]+@[^@\\s]+\\.[A-Za-z]{2,}$",
+     "title": "Email",
+     "type": "string"
+    },
+    "pan": {
+     "anyOf": [
+      {
+       "pattern": "^[A-Z]{5}[0-9]{4}[A-Z]$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Synthetic PAN only",
+     "title": "Pan"
+    },
+    "state": {
+     "maxLength": 50,
+     "minLength": 2,
+     "title": "State",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "email",
+    "state"
+   ],
+   "title": "Complainant",
+   "type": "object"
+  },
+  "EntityTypeClaimed": {
+   "enum": [
+    "broker",
+    "mutual_fund",
+    "registrar",
+    "listed_company",
+    "depository",
+    "depository_participant",
+    "bank",
+    "nbfc",
+    "insurance",
+    "other",
+    "unknown"
+   ],
+   "title": "EntityTypeClaimed",
+   "type": "string"
+  },
+  "Regulator": {
+   "enum": [
+    "SEBI",
+    "RBI",
+    "IRDAI",
+    "PFRDA",
+    "unknown"
+   ],
+   "title": "Regulator",
+   "type": "string"
+  },
+  "RunOptions": {
+   "additionalProperties": false,
+   "properties": {
+    "prompt_variant": {
+     "anyOf": [
+      {
+       "enum": [
+        "v1",
+        "v2"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Prompt Variant"
+    },
+    "use_cache": {
+     "default": true,
+     "title": "Use Cache",
+     "type": "boolean"
+    },
+    "demo_fault": {
+     "anyOf": [
+      {
+       "const": "unsupported_citation",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Only honoured when DEMO_FAULTS_ENABLED=true; used to demonstrate self-verification",
+     "title": "Demo Fault"
+    }
+   },
+   "title": "RunOptions",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "Inbound investor complaint. Synthetic data only.",
+ "properties": {
+  "client_reference": {
+   "anyOf": [
+    {
+     "pattern": "^[A-Za-z0-9_-]{1,40}$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Client Reference"
+  },
+  "complainant": {
+   "$ref": "#/$defs/Complainant"
+  },
+  "channel": {
+   "$ref": "#/$defs/Channel"
+  },
+  "complaint_text": {
+   "maxLength": 5000,
+   "minLength": 30,
+   "title": "Complaint Text",
+   "type": "string"
+  },
+  "entity_name": {
+   "anyOf": [
+    {
+     "maxLength": 200,
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Entity Name"
+  },
+  "entity_type_claimed": {
+   "$ref": "#/$defs/EntityTypeClaimed",
+   "default": "unknown"
+  },
+  "product": {
+   "anyOf": [
+    {
+     "maxLength": 100,
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Product"
+  },
+  "amount_inr": {
+   "anyOf": [
+    {
+     "maximum": 10000000000.0,
+     "minimum": 0.0,
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Amount Inr"
+  },
+  "incident_date": {
+   "format": "date",
+   "title": "Incident Date",
+   "type": "string"
+  },
+  "complained_to_entity_on": {
+   "anyOf": [
+    {
+     "format": "date",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Complained To Entity On"
+  },
+  "entity_response_received": {
+   "default": false,
+   "title": "Entity Response Received",
+   "type": "boolean"
+  },
+  "entity_response_date": {
+   "anyOf": [
+    {
+     "format": "date",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Entity Response Date"
+  },
+  "regulator_addressed": {
+   "$ref": "#/$defs/Regulator",
+   "default": "SEBI"
+  },
+  "callback_url": {
+   "anyOf": [
+    {
+     "format": "uri",
+     "maxLength": 2083,
+     "minLength": 1,
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Callback Url"
+  },
+  "options": {
+   "$ref": "#/$defs/RunOptions"
+  }
+ },
+ "required": [
+  "complainant",
+  "channel",
+  "complaint_text",
+  "incident_date"
+ ],
+ "title": "ComplaintRequest",
+ "type": "object"
+}

@@ -1,0 +1,46 @@
+@doc_id: SEBI-SCORES-MC
+@regulator: SEBI
+@title: SEBI Master Circular - Redressal of investor grievances through the SEBI Complaints Redress System (SCORES) and linking it to the Online Dispute Resolution platform
+@reference: SEBI/HO/OIAE/IGRD/P/CIR/2023/156
+@version: 2023-09-20
+@source_url: https://www.sebi.gov.in/legal/master-circulars/
+@note: Curated clause-level extract prepared for indexing. Wording is condensed from the official circular; confirm each passage against the official PDF at Evaluation 1. Drop the official PDF into corpus/raw/ to index it as well.
+
+## [SCORES-1] Scope of SCORES | type=scope | entities=listed_company,broker,depository,depository_participant,registrar,mutual_fund,investment_adviser,portfolio_manager,stock_exchange
+SCORES is the web based centralised grievance redress system of SEBI. An investor may lodge a complaint on SCORES against a listed company, a SEBI registered intermediary or a market infrastructure institution. SEBI registered intermediaries include stock brokers, depository participants, registrars to an issue and share transfer agents, mutual funds and their asset management companies, investment advisers, research analysts and portfolio managers. Market infrastructure institutions include stock exchanges, clearing corporations and depositories.
+
+## [SCORES-2] Complaints against entities not regulated by SEBI | type=exclusion | entities=other
+SCORES handles complaints only against entities regulated by SEBI and only in respect of matters within the regulatory purview of SEBI. Complaints against entities that are not regulated by SEBI, or about products and services that are regulated by another regulator or authority, are not dealt with under SCORES, and the complainant is advised to approach the appropriate regulator or authority.
+
+## [SCORES-3] Matters not considered as complaints | type=exclusion | entities=all
+The following are not considered as complaints under SCORES: (a) complaints that are incomplete, vague or not specific; (b) allegations without supporting documents; (c) suggestions, or queries seeking guidance or explanation; (d) matters that are sub judice, that is, pending before a court of law, tribunal or arbitrator; (e) complaints against companies that are unlisted, delisted, wound up or under liquidation; (f) complaints against entities that are not regulated by SEBI; (g) complaints that have already been disposed of on SCORES and are filed again without new facts.
+
+## [SCORES-4] Time limit for lodging a complaint | type=maintainability | entities=all
+An investor shall first take up the grievance with the concerned listed company or registered intermediary. A complaint on SCORES may be lodged within three years from the date of the cause of the complaint. A complaint lodged after three years from the date of the cause of the complaint shall not be maintainable on SCORES.
+
+## [SCORES-5] Timeline for redressal by the entity | type=timeline | entities=listed_company,broker,depository,depository_participant,registrar,mutual_fund,investment_adviser,portfolio_manager,stock_exchange
+A complaint lodged on SCORES is forwarded to the concerned entity. The entity shall resolve the complaint and upload an Action Taken Report on SCORES within 21 calendar days from the date of receipt of the complaint. The entity shall keep the complainant informed of the resolution.
+
+## [SCORES-6] First level review by the Designated Body | type=procedure | entities=listed_company,broker,depository_participant
+Where the investor is not satisfied with the resolution provided by the entity, or the entity has not resolved the complaint within 21 calendar days, the investor may seek a first level review by the Designated Body within 15 calendar days. The Designated Body is the stock exchange in the case of listed companies and stock brokers, and the depository in the case of depository participants. The Designated Body shall complete the review within 21 calendar days.
+
+## [SCORES-7] Second level review by SEBI | type=procedure | entities=all
+Where the investor remains dissatisfied after the first level review, the investor may seek a second level review by SEBI within 15 calendar days. SEBI may take appropriate action against an entity that fails to redress complaints.
+
+## [SCORES-8] Online Dispute Resolution | type=procedure | entities=all
+Where a complaint is not resolved through SCORES, the investor may initiate dispute resolution through the Online Dispute Resolution (ODR) portal in terms of SEBI Master Circular SEBI/HO/OIAE/OIAE_IAD-1/P/CIR/2023/131, through conciliation and, if required, online arbitration.
+
+## [SCORES-9A] Responsibility of stock brokers | type=responsibility | entities=broker
+Complaints relating to trading accounts, contract notes, unauthorised trades, settlement of funds and securities, margin and the running account of a client are the responsibility of the stock broker. The stock exchange is the Designated Body for complaints against stock brokers.
+
+## [SCORES-9B] Responsibility of depositories and depository participants | type=responsibility | entities=depository,depository_participant
+Complaints relating to demat accounts, account opening and closure, delivery instruction slips, off-market transfers, pledge and transmission of securities held in demat form are the responsibility of the depository participant, and of the depository where the matter concerns the depository system. The depository is the Designated Body for complaints against depository participants.
+
+## [SCORES-9C] Responsibility of registrars and share transfer agents | type=responsibility | entities=registrar
+Complaints relating to transfer and transmission of physical securities, issue of duplicate share certificates, change of address or bank mandate in the records of the issuer, and processing of demat requests on behalf of an issuer are the responsibility of the registrar and share transfer agent, acting together with the issuer company.
+
+## [SCORES-9D] Responsibility of listed companies | type=responsibility | entities=listed_company
+Complaints relating to non-receipt of dividend, interest or redemption amount on securities issued by a listed company, non-receipt of bonus or rights entitlements, buyback and annual reports are the responsibility of the listed company. A listed company shall ensure that adequate steps are taken for expeditious redressal of investor complaints.
+
+## [SCORES-9E] Responsibility of mutual funds | type=responsibility | entities=mutual_fund
+Complaints relating to mutual fund units, including non-receipt of redemption proceeds, IDCW, account statements and transfer of units, are the responsibility of the asset management company of the mutual fund, including where the transaction was processed by its registrar and transfer agent.

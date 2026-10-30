@@ -1,0 +1,274 @@
+{
+ "$defs": {
+  "Citation": {
+   "properties": {
+    "clause_id": {
+     "title": "Clause Id",
+     "type": "string"
+    },
+    "doc_id": {
+     "default": "",
+     "title": "Doc Id",
+     "type": "string"
+    },
+    "regulator": {
+     "default": "",
+     "title": "Regulator",
+     "type": "string"
+    },
+    "reference": {
+     "default": "",
+     "title": "Reference",
+     "type": "string"
+    },
+    "passage_id": {
+     "default": "",
+     "title": "Passage Id",
+     "type": "string"
+    },
+    "quote": {
+     "title": "Quote",
+     "type": "string"
+    }
+   },
+   "required": [
+    "clause_id",
+    "quote"
+   ],
+   "title": "Citation",
+   "type": "object"
+  },
+  "Determination": {
+   "properties": {
+    "route": {
+     "enum": [
+      "assign_to_entity",
+      "refer_to_other_regulator",
+      "not_maintainable",
+      "escalate_to_human"
+     ],
+     "title": "Route",
+     "type": "string"
+    },
+    "domain": {
+     "title": "Domain",
+     "type": "string"
+    },
+    "regulator": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Regulator"
+    },
+    "responsible_entity": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Responsible Entity"
+    },
+    "entity_type": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Entity Type"
+    },
+    "timeline": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Timeline"
+    },
+    "reason": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Reason"
+    },
+    "provisional_route": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Route the agents would have given; NOT issued",
+     "title": "Provisional Route"
+    },
+    "basis": {
+     "title": "Basis",
+     "type": "string"
+    },
+    "citations": {
+     "items": {
+      "$ref": "#/$defs/Citation"
+     },
+     "title": "Citations",
+     "type": "array"
+    }
+   },
+   "required": [
+    "route",
+    "domain",
+    "basis"
+   ],
+   "title": "Determination",
+   "type": "object"
+  },
+  "Escalation": {
+   "properties": {
+    "required": {
+     "title": "Required",
+     "type": "boolean"
+    },
+    "reason": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Reason"
+    },
+    "path": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Path"
+    }
+   },
+   "required": [
+    "required"
+   ],
+   "title": "Escalation",
+   "type": "object"
+  }
+ },
+ "description": "Outbound contract for GET /runs/{run_id}.",
+ "properties": {
+  "run_id": {
+   "title": "Run Id",
+   "type": "string"
+  },
+  "status": {
+   "enum": [
+    "queued",
+    "running",
+    "completed",
+    "escalated",
+    "degraded",
+    "failed"
+   ],
+   "title": "Status",
+   "type": "string"
+  },
+  "correlation_id": {
+   "title": "Correlation Id",
+   "type": "string"
+  },
+  "determination": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Determination"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "escalation": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Escalation"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "verification": {
+   "anyOf": [
+    {
+     "type": "object"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Verification"
+  },
+  "prompt_versions": {
+   "title": "Prompt Versions",
+   "type": "object"
+  },
+  "usage": {
+   "title": "Usage",
+   "type": "object"
+  },
+  "timings": {
+   "title": "Timings",
+   "type": "object"
+  },
+  "disclaimer": {
+   "default": "Routing recommendation only. This system does not dispose of complaints; a grievance officer decides.",
+   "title": "Disclaimer",
+   "type": "string"
+  },
+  "contract_version": {
+   "default": "1.0.0",
+   "title": "Contract Version",
+   "type": "string"
+  }
+ },
+ "required": [
+  "run_id",
+  "status",
+  "correlation_id"
+ ],
+ "title": "RunResult",
+ "type": "object"
+}

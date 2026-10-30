@@ -1,0 +1,34 @@
+@doc_id: RBI-IOS-2021
+@regulator: RBI
+@title: Reserve Bank - Integrated Ombudsman Scheme, 2021
+@reference: RBI/2021-22/117 CEPD.PRD.No.S873/13.01.001/2021-22
+@version: 2021-11-12
+@source_url: https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx
+@note: Curated clause-level extract prepared for indexing. Wording is condensed from the scheme; confirm against the official PDF at Evaluation 1.
+
+## [RBIOS-2] Application of the Scheme | type=scope | entities=bank,nbfc,payment_system,credit_information_company
+The Scheme shall apply to the services provided by a Regulated Entity to its customers. Regulated Entities covered are: (a) all commercial banks, regional rural banks, scheduled primary urban co-operative banks and non-scheduled primary urban co-operative banks with deposit size of rupees fifty crore and above; (b) non-banking financial companies which are authorised to accept deposits, or which have customer interface with an asset size of rupees one hundred crore and above; (c) system participants regulated by the Reserve Bank; and (d) credit information companies.
+
+## [RBIOS-3A] Definition of Regulated Entity | type=definition | entities=bank,nbfc,payment_system,credit_information_company
+"Regulated Entity" means a bank, a non-banking financial company, a system participant or a credit information company, as defined in the Scheme, or any other entity as may be specified by the Reserve Bank from time to time. "Customer" means a person who uses the services provided by a Regulated Entity.
+
+## [RBIOS-3B] Definition of deficiency in service | type=definition | entities=bank,nbfc,payment_system,credit_information_company
+"Deficiency in service" means a shortcoming or an inadequacy in any financial service or other services relating thereto, which the Regulated Entity is required to provide statutorily or otherwise, which may or may not result in financial loss or damage to the customer.
+
+## [RBIOS-8] Grounds of complaint | type=grounds | entities=bank,nbfc,payment_system,credit_information_company
+Any customer aggrieved by an act or omission of a Regulated Entity resulting in deficiency in service may file a complaint under the Scheme personally or through an authorised representative.
+
+## [RBIOS-10A] Matters excluded from the Scheme | type=exclusion | entities=all
+No complaint for deficiency in service shall lie under the Scheme in matters involving: (a) commercial judgment or commercial decision of a Regulated Entity; (b) a dispute between a vendor and a Regulated Entity relating to an outsourcing contract; (c) a grievance not addressed to the Ombudsman directly; (d) general grievances against the management or executives of a Regulated Entity; (e) a dispute in which action is initiated by a Regulated Entity in compliance with the orders of a statutory or law enforcing authority; (f) a service not within the regulatory purview of the Reserve Bank; (g) a dispute between Regulated Entities; (h) a dispute involving the employee-employer relationship of a Regulated Entity.
+
+## [RBIOS-10B] Grounds for non-maintainability | type=maintainability | entities=bank,nbfc,payment_system,credit_information_company
+A complaint under the Scheme shall not lie unless: (a) the complainant had, before making a complaint under the Scheme, made a written complaint to the Regulated Entity concerned and the complaint was rejected wholly or partly by the Regulated Entity and the complainant is not satisfied with the reply, or the complainant had not received any reply within 30 days after the Regulated Entity received the complaint; and (b) the complaint is made to the Ombudsman within one year after the complainant has received the reply of the Regulated Entity, or, where no reply is received, within one year and 30 days from the date of the complaint to the Regulated Entity.
+
+## [RBIOS-10C] Other grounds for non-maintainability | type=maintainability | entities=all
+A complaint shall not lie under the Scheme where it is in respect of the same cause of action which is already pending before or settled or dealt with on merits by an Ombudsman, a court, a tribunal, an arbitrator or any other forum or authority, or where the complaint is abusive, frivolous or vexatious in nature.
+
+## [RBIOS-11] Procedure for filing a complaint | type=procedure | entities=bank,nbfc,payment_system,credit_information_company
+A complaint may be lodged online through the portal designated for the purpose by the Reserve Bank, or through electronic or physical mode to the Centralised Receipt and Processing Centre. The complaint shall be signed or authenticated by the complainant and shall contain the details of the Regulated Entity and the deficiency in service.
+
+## [RBIOS-15] Resolution of complaints | type=procedure | entities=bank,nbfc,payment_system,credit_information_company
+The Ombudsman shall endeavour to promote a settlement of the complaint by agreement between the complainant and the Regulated Entity through facilitation, conciliation or mediation, and may otherwise pass an award. The Regulated Entity shall furnish its written version within 15 days of receiving the complaint from the Ombudsman.
